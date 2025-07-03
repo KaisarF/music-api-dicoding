@@ -32,7 +32,7 @@ class AlbumsService {
   }
 
   getAlbumById(id) {
-    const albumId = this._albums.filter((album) => album.id === id);
+    const albumId = this._albums.find((album) => album.id === id);
 
     if (!albumId) {
       throw new NotFoundError(`catatan dengan id ${id} tidak ditemukan`);

@@ -34,7 +34,7 @@ class SongsService {
   }
 
   getSongById(id) {
-    const songId = this._songs.filter((song) => song.id === id);
+    const songId = this._songs.find((song) => song.id === id);
 
     if (!songId) {
       throw new NotFoundError(`Song dengan id ${id} tidak ditemukan`);

@@ -4,45 +4,37 @@ class SongHandler {
   constructor(service, validator) {
     this._service = service;
     this._validator = validator;
-    this.postNoteHandler = this.postSongHandler.bind(this);
-    this.getNotesHandler = this.getSongsHandler.bind(this);
-    this.getNoteByIdHandler = this.getSongByIdHandler.bind(this);
-    this.putNoteByIdHandler = this.putSongByIdHandler.bind(this);
-    this.deleteNoteByIdHandler = this.deleteSongByIdHandler.bind(this);
+
+    this.postSongHandler = this.postSongHandler.bind(this);
+    this.getSongsHandler = this.getSongsHandler.bind(this);
+    this.getSongByIdHandler = this.getSongByIdHandler.bind(this);
+    this.putSongByIdHandler = this.putSongByIdHandler.bind(this);
+    this.deleteSongByIdHandler = this.deleteSongByIdHandler.bind(this);
   }
 
-  postSongHandler(request, h) {
-    try {
-      this._validator.validateSongPayload(request.payload);
-      const {
-        title, year, genre, performer, duration, albumId,
-      } = request.payload;
+  async postSongHandler(request, h) {
+    this._validator.validateSongPayload(request.payload);
+    const {
+      title, year, performer, genre, duration, albumId,
+    } = request.payload;
 
-      const songId = this._service.addSong({
-        title, year, genre, performer, duration, albumId,
-      });
+    const songId = await this._service.addSong({
+      title, year, genre, performer, duration, albumId,
+    });
 
-      const response = h.response({
-        status: 'success',
-        message: 'Lagu berhasil ditambahkan',
-        data: {
-          songId,
-        },
-      });
-      response.code(201);
-      return response;
-    } catch (error) {
-      const response = h.response({
-        status: 'fail',
-        message: error.message,
-      });
-      response.code(400);
-      return response;
-    }
+    const response = h.response({
+      status: 'success',
+      message: 'Lagu berhasil ditambahkan',
+      data: {
+        songId,
+      },
+    });
+    response.code(201);
+    return response;
   }
 
-  getSongsHandler() {
-    const songs = this._service.getSongs();
+  async getSongsHandler() {
+    const songs = await this._service.getSongs();
     return {
       status: 'success',
       data: {
@@ -51,66 +43,39 @@ class SongHandler {
     };
   }
 
-  getSongByIdHandler(request, h) {
+  async getSongByIdHandler(request, h) {
     const { id } = request.params;
-    const song = this._service.getSongById(id);
-    try {
-      const response = h.response({
-        status: 'success',
-        data: {
-          song,
-        },
-      });
-      response.code(200);
-      return response;
-    } catch (error) {
-      const response = h.response({
-        status: 'fail',
-        message: error.message,
-      });
-      response.code(404);
-      return response;
-    }
+    const song = await this._service.getSongById(id);
+
+    const response = h.response({
+      status: 'success',
+      data: {
+        song,
+      },
+    });
+    response.code(200);
+    return response;
   }
 
-  putSongByIdHandler(request, h) {
-    try {
-      this._validator.validateSongPayload(request.payload);
-      const { id } = request.params;
-      this._service.editSongById(id, request.payload);
-      const response = h.response({
-        status: 'success',
-        message: 'lagu berhasil ditambahkan',
+  async putSongByIdHandler(request, h) {
+    this._validator.validateSongPayload(request.payload);
+    const { id } = request.params;
 
-      });
-      response.code(200);
-      return response;
-    } catch (error) {
-      const response = h.response({
-        status: 'fail',
-        message: error.message,
-      });
-      response.code(404);
-      return response;
-    }
+    await this._service.editSongById(id, request.payload);
+    return h.response({
+      status: 'success',
+      message: 'lagu berhasil dirubah',
+
+    });
   }
 
-  deleteSongByIdHandler(request, h) {
-    try {
-      const { id } = request.params;
-      this._service.deleteSongById(id);
-      return {
-        status: 'success',
-        message: 'Lagu berhasil dihapus',
-      };
-    } catch (error) {
-      const response = h.response({
-        status: 'fail',
-        message: error.message,
-      });
-      response.code(404);
-      return response;
-    }
+  async deleteSongByIdHandler(request) {
+    const { id } = request.params;
+    await this._service.deleteSongById(id);
+    return {
+      status: 'success',
+      message: 'Lagu berhasil dihapus',
+    };
   }
 }
 
